@@ -25,7 +25,13 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    """Health check endpoint with model status"""
+    model_status = "loaded" if model_service.model is not None else "not loaded"
+    return {
+        "status": "ok",
+        "model_status": model_status,
+        "api_version": "0.1.0"
+    }
 
 @app.post("/predict")
 async def predict_digit(file: UploadFile = File(...)):
