@@ -23,14 +23,16 @@ def build_cnn_v1():
     return model
 
 def build_cnn_v2():
-    """Improved CNN with more layers"""
+    """Improved CNN with more layers and ReLU optimization"""
     model = models.Sequential([
-        layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),
-        layers.Conv2D(32, (3, 3), activation='relu'),
+        layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1), padding='same'),
+        layers.ReLU(),
+        layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
         
-        layers.Conv2D(64, (3, 3), activation='relu'),
-        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+        layers.ReLU(),
+        layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
         layers.MaxPooling2D((2, 2)),
         
         layers.Flatten(),
