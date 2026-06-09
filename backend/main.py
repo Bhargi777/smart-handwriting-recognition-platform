@@ -35,7 +35,7 @@ def health_check():
 
 @app.post("/predict")
 async def predict_digit(file: UploadFile = File(...)):
-    """Predict digit from uploaded image"""
+    """Predict digit from uploaded image with confidence scores"""
     try:
         # Read image file
         contents = await file.read()
@@ -47,13 +47,15 @@ async def predict_digit(file: UploadFile = File(...)):
         # Make prediction
         predicted_class, confidence, confidence_scores = model_service.predict(image_array)
         
+        # Return detailed prediction with confidence scores for all digits
         return {
             "predicted_digit": predicted_class,
-            "confidence": confidence,
-            "confidence_scores": confidence_scores
+            "confidence": round(confidence, 4),
+            "confidence_scores": {k: round(v, 4) for k, v in confidence_scores.items()},
+            "success": True
         }
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": str(e), "success": False}
 
 @app.post("/predict/base64")
 async def predict_digit_base64(image_data: dict):
