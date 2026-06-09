@@ -49,6 +49,32 @@ async def predict_digit(file: UploadFile = File(...)):
     except Exception as e:
         return {"error": str(e)}
 
+@app.post("/predict/base64")
+async def predict_digit_base64(image_data: dict):
+    """Predict digit from base64 encoded image"""
+    try:
+        import base64
+        from io import BytesIO
+        
+        # Decode base64 image
+        image_data_str = image_data.get("image", "")
+        image_bytes = base64.b64decode(image_data_str)
+        image = Image.open(BytesIO(image_bytes))
+        
+        # Convert to numpy array
+        image_array = np.array(image)
+        
+        # Make prediction
+        predicted_class, confidence, confidence_scores = model_service.predict(image_array)
+        
+        return {
+            "predicted_digit": predicted_class,
+            "confidence": confidence,
+            "confidence_scores": confidence_scores
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
