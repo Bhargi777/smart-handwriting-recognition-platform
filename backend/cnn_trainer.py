@@ -2,12 +2,14 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, models
 import os
+from training_logger import TrainingLogger
 
 class CNNTrainer:
     def __init__(self, model, checkpoint_dir='models/checkpoints'):
         self.model = model
         self.checkpoint_dir = checkpoint_dir
         os.makedirs(checkpoint_dir, exist_ok=True)
+        self.logger = TrainingLogger()
     
     def train(self, x_train, y_train, x_val, y_val, epochs=20, batch_size=32):
         """Train CNN with checkpointing"""
@@ -33,6 +35,16 @@ class CNNTrainer:
             verbose=1
         )
         
+        # Log training history
+        for epoch in range(len(history.history['loss'])):
+            logs = {
+                'loss': history.history['loss'][epoch],
+                'val_loss': history.history['val_loss'][epoch],
+                'accuracy': history.history['accuracy'][epoch],
+                'val_accuracy': history.history['val_accuracy'][epoch]
+            }
+            self.logger.on_epoch_end(epoch, logs)
+        
         return history
     
     def save_model(self, filepath):
@@ -40,6 +52,14 @@ class CNNTrainer:
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         self.model.save(filepath)
         print(f"Model saved to {filepath}")
+    
+    def plot_training_curves(self, save_path='logs/training_curves.png'):
+        """Plot and save training curves"""
+        fig = self.logger.plot_training_curves()
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        fig.savefig(save_path)
+        print(f"Training curves saved to {save_path}")
+        return fig
 
 if __name__ == "__main__":
     print("CNN trainer module loaded")
